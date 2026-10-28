@@ -21,7 +21,23 @@ export default function Dashboard() {
     }
   }, []);
 
-  useEffect(() => { loadTasks(); }, [loadTasks]);
+  useEffect(() => {
+    let active = true;
+    fetchTasks()
+      .then((data) => {
+        if (active) {
+          setTasks(data);
+          setError('');
+        }
+      })
+      .catch((err) => {
+        if (active) setError(err.message || 'Could not load tasks. Check that the API is running.');
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => { active = false; };
+  }, []);
 
   const completed = tasks.filter((task) => task.completed).length;
   const important = tasks.filter((task) => task.important && !task.completed).length;

@@ -19,7 +19,23 @@ export default function Tasks() {
     }
   }, []);
 
-  useEffect(() => { loadTasks(); }, [loadTasks]);
+  useEffect(() => {
+    let active = true;
+    fetchTasks()
+      .then((data) => {
+        if (active) {
+          setTasks(data);
+          setError('');
+        }
+      })
+      .catch((err) => {
+        if (active) setError(err.message || 'Could not load tasks.');
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => { active = false; };
+  }, []);
 
   return (
     <section className="tasks-page">
