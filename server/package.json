@@ -1,0 +1,23 @@
+{
+  "name": "tasknest-server",
+  "version": "1.0.0",
+  "private": true,
+  "description": "TaskNest API with a deterministic productivity score",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "@prisma/client": "6.19.0",
+    "cors": "^2.8.6",
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14",
+    "prisma": "6.19.0"
+  },
+  "type": "commonjs"
+}

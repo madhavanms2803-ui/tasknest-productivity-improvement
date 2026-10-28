@@ -1,0 +1,29 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Task {
+  id          Int      @id @default(autoincrement())
+  title       String   @db.VarChar(200)
+  completed   Boolean  @default(false)
+  important   Boolean  @default(false)
+  completedAt DateTime?
+  createdAt   DateTime @default(now())
+
+  @@index([completed, completedAt])
+  @@index([important])
+}
+
+// Kept for compatibility with databases created from the starter schema.
+// The application no longer reads or increments this stored score; the
+// productivity score is derived from the current Task records.
+model Score {
+  id        Int      @id @default(autoincrement())
+  value     Int      @default(0)
+  updatedAt DateTime @updatedAt
+}
