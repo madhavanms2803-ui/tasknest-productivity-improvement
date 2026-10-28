@@ -9,7 +9,7 @@ TaskNest is a React + Express + PostgreSQL task manager. This submission improve
 - Added completion timestamps so the score can include recent consistency.
 - Made task updates idempotent: repeating the same completion request does not award duplicate points.
 - Added validation and clearer HTTP error responses.
-- Added a pure scoring helper and unit tests.
+- Added a pure scoring helper, scoring unit tests, and GitHub Actions checks.
 
 ## Transparent scoring model
 
@@ -34,8 +34,8 @@ The score endpoint also returns the two components and task counts, so the UI ca
 From the repository root:
 
 - Run cd server
+- Copy .env.example to .env and set DATABASE_URL to your PostgreSQL connection string before installing dependencies.
 - Run npm install
-- Copy .env.example to .env and set DATABASE_URL to your PostgreSQL connection string.
 - Run npx prisma db push
 - Run npm run dev
 
