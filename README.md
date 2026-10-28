@@ -1,43 +1,61 @@
 # TaskNest — Productivity Score Improvement
 
-TaskNest is a React + Express + PostgreSQL task manager. This submission investigates the original productivity-score implementation and replaces its inconsistent increments with a transparent score derived from task data.
+TaskNest is a React + Express + PostgreSQL task manager. This submission improves the existing productivity score so the number is derived from current task data, explained in the UI, and responsive to task importance and consistency.
 
 ## What changed
 
-- Removed the stored-score increments that awarded points for creating tasks and completing tasks separately.
-- Added an `isImportant` task flag; important completed tasks count twice in the completion component.
-- Recorded `completedAt` when a task is completed and cleared it when reopened.
-- Calculate a 0–100 score from a weighted task-completion rate (70%) and recent consistency (30% of the last seven calendar days with at least one completion).
-- Added score breakdown and priority controls so users can understand what affects the score.
+- Replaced score increments stored on task creation/completion with one deterministic calculation from the current tasks.
+- Added an Important flag that persists per task and gives completed important tasks twice the weight of regular tasks.
+- Added completion timestamps so the score can include recent consistency.
+- Made task updates idempotent: repeating the same completion request does not award duplicate points.
+- Added validation and clearer HTTP error responses.
+- Added a pure scoring helper, scoring unit tests, and GitHub Actions checks.
+
+## Transparent scoring model
+
+The total is capped at 100 points:
+
+1. Task completion (up to 80 points): completed task weight divided by total task weight, multiplied by 80. Important tasks have weight 2; regular tasks have weight 1.
+2. Consistency (up to 20 points): 20 multiplied by the number of distinct days with at least one completed task in the trailing seven-day window, divided by 7.
+3. The final score is the rounded sum of both parts. With no tasks, the score is 0.
+
+The score endpoint also returns the two components and task counts, so the UI can explain how the result was reached. This is a product metric—not a measure of a person's worth or energy level.
+
+## Requirements
+
+- Node.js 20+
+- PostgreSQL
+- npm
 
 ## Run locally
 
-Requirements: Node.js 20+, PostgreSQL, and a configured `DATABASE_URL`.
+### 1. Backend
 
-```bash
-cd server
-npm install
-# Set DATABASE_URL in server/.env (do not commit secrets)
-npx prisma migrate dev --name tasknest_score_improvement
-npm run dev
-```
+From the repository root:
+
+- Run cd server
+- Copy .env.example to .env and set DATABASE_URL to your PostgreSQL connection string before installing dependencies.
+- Run npm install
+- Run npx prisma db push
+- Run npm run dev
+
+The API listens on port 5000 by default. DATABASE_URL, PORT, and CORS_ORIGIN are configured through environment variables.
+
+### 2. Frontend
 
 In a second terminal:
 
-```bash
-cd client
-npm install
-npm run dev
-```
+- Run cd client
+- Run npm install
+- Copy .env.example to .env (the default API URL is http://localhost:5000).
+- Run npm run dev
 
-Set `VITE_API_URL` in the client environment if the API is not running at `http://localhost:5000`. The frontend defaults to that local URL.
+Run checks with npm run build and npm run lint in client, and npm test in server.
 
-## Deployment notes
+## Deployment configuration
 
-Deploy `server` as a Node web service and `client` as a static Vite site. Provision hosted PostgreSQL (for example Neon or Supabase), configure `DATABASE_URL` on the server, and set `VITE_API_URL` to the deployed server URL when building the frontend. Run the Prisma migration against the hosted database before serving traffic. Never commit database credentials.
+Use a hosted PostgreSQL database such as Neon or Supabase, deploy server to a Node-compatible host such as Render, and deploy client to a static host such as Netlify.
 
-See [`Changes.md`](./Changes.md) for investigation findings and the score formula.
+Set the backend's DATABASE_URL, PORT (usually supplied by the host), and CORS_ORIGIN (the deployed frontend origin). Set the frontend's VITE_API_URL to the deployed backend URL, without a trailing slash. Apply the Prisma schema to the hosted database with npx prisma db push before serving traffic.
 
-## Validation status
-
-The repository contains the implementation and setup instructions. Run the commands above against your own PostgreSQL instance to verify database migrations and end-to-end behavior before deployment.
+Deployment and the requested explanation video should be completed and their URLs added to the assignment submission after hosting; they are not represented as completed by this repository.
